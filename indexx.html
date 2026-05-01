@@ -1,0 +1,221 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rishav Sharma Computer Classes - Bhind</title>
+
+<style>
+body {margin:0;font-family:Arial;background:#e3f2fd;}
+
+header {
+  background: linear-gradient(45deg,#007bff,#00c6ff);
+  color:white;text-align:center;padding:25px;
+}
+
+section {display:none;padding:20px;}
+.active {display:block;}
+
+.box {
+  background:white;padding:20px;margin:10px;
+  border-radius:10px;box-shadow:0 0 10px #ccc;
+}
+
+button {
+  padding:10px;background:green;color:white;
+  border:none;border-radius:5px;margin:5px;
+}
+
+input, select {
+  width:100%;padding:10px;margin:5px 0;
+}
+
+.whatsapp {
+  position:fixed;bottom:20px;right:20px;
+  background:#25D366;color:white;
+  padding:15px;border-radius:50%;
+  text-decoration:none;
+}
+</style>
+
+<script>
+let admissionOpen = true;
+let savedData = "";
+
+function next(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function toggleAdmission(){
+  admissionOpen=!admissionOpen;
+  document.getElementById("status").innerText =
+  admissionOpen ? "Admission Open 🎓" : "Admission Closed ❌";
+}
+
+function showSyllabus(){
+  let course=document.getElementById("course").value;
+  let text="";
+  if(course=="PGDCA"){
+    text="PGDCA Subjects:\n- Computer Basics\n- MS Office\n- C Programming\n- SQL\n- Web Design";
+  } else {
+    text="DCA Subjects:\n- Basics\n- Typing\n- MS Word\n- Excel\n- Internet";
+  }
+  document.getElementById("syllabusText").innerText=text;
+}
+
+function submitForm(e){
+  e.preventDefault();
+
+  if(!admissionOpen){
+    alert("Admission Closed!");
+    return;
+  }
+
+  let name=document.getElementById("name").value;
+  let mobile=document.getElementById("mobile").value;
+  let course=document.getElementById("course").value;
+
+  // save message
+  savedData = `Admission:\nName: ${name}\nMobile: ${mobile}\nCourse: ${course}`;
+
+  showSyllabus();
+  next('syllabus');
+}
+
+function openWhatsApp(){
+  if(savedData!=""){
+    window.open(`https://wa.me/917440425359?text=${encodeURIComponent(savedData)}`);
+  } else {
+    alert("Please fill form first!");
+  }
+}
+</script>
+
+</head>
+
+<body>
+
+<header>
+<h1>Rishav Sharma Computer Classes</h1>
+<p>Bhind (M.P.)</p>
+<h3 id="status">Admission Open 🎓</h3>
+<button onclick="toggleAdmission()">Open / Close Admission</button>
+</header>
+
+<!-- HOME -->
+<section id="home" class="active">
+<h2>Welcome</h2>
+<p>Best Computer Institute in Bhind 🚀</p>
+<button onclick="next('courses')">Next → Courses</button>
+</section>
+
+<!-- COURSES -->
+<section id="courses">
+<h2>Courses</h2>
+
+<div class="box">
+<h3>PGDCA (1 Year)</h3>
+<p>Advanced Computer Course</p>
+</div>
+
+<div class="box">
+<h3>DCA (1 Year)</h3>
+<p>Basic Computer Course</p>
+</div>
+
+<div class="box">
+<h3>CPCT Preparation</h3>
+<p>Typing + Computer + Reasoning</p>
+</div>
+
+<button onclick="next('home')">⬅ Back</button>
+<button onclick="next('form')">Next → Form</button>
+</section>
+
+<!-- FORM -->
+<section id="form">
+<h2>Admission Form</h2>
+
+<form onsubmit="submitForm(event)">
+<input type="text" id="name" placeholder="Your Name" required>
+<input type="number" id="mobile" placeholder="Mobile Number" required>
+
+<select id="course">
+<option>PGDCA</option>
+<option>DCA</option>
+</select>
+
+<button type="submit">Submit</button>
+</form>
+
+<button onclick="next('courses')">⬅ Back</button>
+</section>
+
+<!-- SYLLABUS -->
+<section id="syllabus">
+<h2>Syllabus</h2>
+
+<div class="box">
+<pre id="syllabusText" style="font-size: 20px;"></pre>
+</div>
+
+<div class="box">
+<h3>CPCT Syllabus</h3>
+<p>- Computer Basics</p>
+<p>- Typing Hindi/English</p>
+<p>- MS Office</p>
+<p>- Internet</p>
+<p>- Reasoning</p>
+</div>
+
+<button onclick="next('form')">⬅ Back</button>
+<button onclick="next('process')">Next → Process</button>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+<h2>Admission Process</h2>
+
+<div class="box">
+<h3>Eligibility <p>✔ CPCT: 12th Pass</p></h3>
+<p>✔ DCA: 12th Pass</p>
+<p>✔ PGDCA: Graduation</p>
+</div>
+
+<div class="box">
+<h3>Steps</h3>
+<p>1. Fill Form</p>
+<p>2. Select Course</p>
+<p>3. Contact on WhatsApp</p>
+<p>4. Pay Fees</p>
+<p>5. Start Classes</p>
+<button onclick="openWhatsApp()">📲 Open WhatsApp</button>
+</div>
+
+<div class="box">
+<h3>Fees</h3>
+<p>PGDCA: ₹10000</p>
+<p>DCA: ₹8000</p>
+</div>
+
+<button onclick="next('syllabus')">⬅ Back</button>
+<button onclick="next('contact')">Next → Contact</button>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+<h2>Contact</h2>
+<p>Rishav Sharma</p>
+<p>📞 7440425359</p>
+<p>📍 Bhind, Madhya Pradesh</p>
+
+<iframe src="https://maps.google.com/maps?q=bhind&t=&z=13&ie=UTF8&iwloc=&output=embed"
+width="100%" height="300"></iframe>
+
+<button onclick="next('process')">⬅ Back</button>
+</section>
+
+<a class="whatsapp" href="https://wa.me/917440425359">💬</a>
+
+</body>
+</html>
