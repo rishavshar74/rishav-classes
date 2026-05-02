@@ -1,8 +1,8 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Rishav Sharma Computer Classes - Bhind</title>
+<title> Jict Computer Classes - Bhind</title>
 
 <style>
 body {margin:0;font-family:Arial;background:#e3f2fd;}
@@ -23,71 +23,175 @@ section {display:none;padding:20px;}
 button {
   padding:10px;background:green;color:white;
   border:none;border-radius:5px;margin:5px;
+  cursor:pointer;
+  width:100%;
 }
 
 input, select {
   width:100%;padding:10px;margin:5px 0;
 }
 
-.whatsapp {
-  position:fixed;bottom:20px;right:20px;
-  background:#25D366;color:white;
-  padding:15px;border-radius:50%;
-  text-decoration:none;
+.step-anim p {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.6s forwards;
+}
+
+.step-anim p:nth-child(1){animation-delay:0.2s;}
+.step-anim p:nth-child(2){animation-delay:0.4s;}
+.step-anim p:nth-child(3){animation-delay:0.6s;}
+.step-anim p:nth-child(4){animation-delay:0.8s;}
+
+@keyframes fadeUp {
+  to {opacity:1; transform:translateY(0);}
+}
+
+/* WhatsApp floating button */
+.floating-enquiry {
+  position: fixed;
+  right: 15px;
+  bottom: 20px;
+  width: 60px;
+  height: 60px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  cursor: pointer;
+  z-index: 999;
 }
 </style>
 
 <script>
-let admissionOpen = true;
-let savedData = "";
+let selectedCourse = "";
+let students = JSON.parse(localStorage.getItem("students")) || [];
 
 function next(id){
+  let target = document.getElementById(id);
+  if(!target){alert("Section not found"); return;}
   document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-function toggleAdmission(){
-  admissionOpen=!admissionOpen;
-  document.getElementById("status").innerText =
-  admissionOpen ? "Admission Open 🎓" : "Admission Closed ❌";
+  target.classList.add("active");
 }
 
 function showSyllabus(){
-  let course=document.getElementById("course").value;
-  let text="";
+  let course = document.getElementById("course").value;
+  selectedCourse = course;
+
+  let text="", fees="", cpctBox=document.getElementById("cpctBox");
+  cpctBox.style.display="none";
+
   if(course=="PGDCA"){
-    text="PGDCA Subjects:\n- Computer Basics\n- MS Office\n- C Programming\n- SQL\n- Web Design";
-  } else {
-    text="DCA Subjects:\n- Basics\n- Typing\n- MS Word\n- Excel\n- Internet";
+    text="Basics, MS Office, C, SQL, Web Design";
+    fees="₹10000";
   }
+  else if(course=="DCA"){
+    text="Computer Basics, Typing, MS Word, Excel";
+    fees="₹8000";
+  }
+  else{
+    text="Typing, Reasoning, Computer Basics";
+    fees="₹5000";
+    cpctBox.style.display="block";
+  }
+
   document.getElementById("syllabusText").innerText=text;
+  document.getElementById("feesText").innerText=fees;
 }
 
 function submitForm(e){
   e.preventDefault();
 
-  if(!admissionOpen){
-    alert("Admission Closed!");
-    return;
-  }
+  let student={
+    name:name.value,
+    mobile:mobile.value,
+    address:address.value,
+    education:education.value,
+    course:selectedCourse,
+    date:new Date().toLocaleString()
+  };
 
-  let name=document.getElementById("name").value;
-  let mobile=document.getElementById("mobile").value;
-  let course=document.getElementById("course").value;
+  students.push(student);
+  localStorage.setItem("students",JSON.stringify(students));
 
-  // save message
-  savedData = `Admission:\nName: ${name}\nMobile: ${mobile}\nCourse: ${course}`;
-
+  alert("Form Saved!");
   showSyllabus();
-  next('syllabus');
+  next("syllabus");
 }
 
-function openWhatsApp(){
-  if(savedData!=""){
-    window.open(`https://wa.me/917440425359?text=${encodeURIComponent(savedData)}`);
-  } else {
-    alert("Please fill form first!");
-  }
+function confirmForm(){
+  if(selectedCourse==""){alert("Fill form first");return;}
+
+  let msg = encodeURIComponent(
+`🎓 Admission Completed
+Name: ${name.value}
+Mobile: ${mobile.value}
+Course: ${selectedCourse}`
+  );
+
+  window.open("https://wa.me/917440425359?text="+msg);
+  next("contact");
+}
+
+/* UPI PAYMENT */
+function payOnline(){
+  let amt=document.getElementById("feesText").innerText.replace("₹","");
+
+  // 👉 CHANGE THIS LATER
+  let upiID = "yourupi@upi";
+
+  window.location.href=
+  `upi://pay?pa=${upiID}&pn=Institute&am=${amt}&cu=INR`;
+}
+
+function feesPaid(){
+  alert("Fees Paid Marked!");
+}
+
+/* ADMIN */
+function openAdmin(){
+  let pass=prompt("Enter Admin Password:");
+  if(pass=="1234@RSC"){
+    renderAdmin();
+    next("admin");
+  } else alert("Wrong Password");
+}
+
+function renderAdmin(){
+  let box=document.getElementById("studentList");
+  box.innerHTML="";
+  students.forEach((s,i)=>{
+    box.innerHTML+=`
+    <div class="box">
+      <b>${i+1}. ${s.name}</b><br>
+      📱 ${s.mobile}<br>
+      🎯 ${s.course}<br>
+      📅 ${s.date}
+    </div>`;
+  });
+}
+
+function clearData(){
+  localStorage.clear();
+  students=[];
+  renderAdmin();
+}
+
+function downloadCSV(){
+  if(students.length==0){alert("No data");return;}
+
+  let csv="Name,Mobile,Course,Date\n";
+  students.forEach(s=>{
+    csv+=`${s.name},${s.mobile},${s.course},${s.date}\n`;
+  });
+
+  let blob=new Blob([csv],{type:"text/csv"});
+  let url=URL.createObjectURL(blob);
+  let a=document.createElement("a");
+  a.href=url;
+  a.download="students.csv";
+  a.click();
 }
 </script>
 
@@ -96,37 +200,34 @@ function openWhatsApp(){
 <body>
 
 <header>
-<h1>Rishav Sharma Computer Classes</h1>
+<h1>JICT Computer Classes By Vinod Sir</h1>
+<h2>Contact No. 7440425359</h2>
 <p>Bhind (M.P.)</p>
-<h3 id="status">Admission Open 🎓</h3>
-<button onclick="toggleAdmission()">Open / Close Admission</button>
+<button onclick="openAdmin()" style="background:black;">Admin Panel</button>
 </header>
 
 <!-- HOME -->
 <section id="home" class="active">
 <h2>Welcome</h2>
-<p>Best Computer Institute in Bhind 🚀</p>
-<button onclick="next('courses')">Next → Courses</button>
+
+<div class="box step-anim">
+<h3>Steps</h3>
+<p>1. Select Course</p>
+<p>2. Fill Form</p>
+<p>3. Get Fees</p>
+<p>4. WhatsApp Confirm</p>
+</div>
+
+<button onclick="next('courses')">Next</button>
 </section>
 
 <!-- COURSES -->
 <section id="courses">
 <h2>Courses</h2>
 
-<div class="box">
-<h3>PGDCA (1 Year)</h3>
-<p>Advanced Computer Course</p>
-</div>
-
-<div class="box">
-<h3>DCA (1 Year)</h3>
-<p>Basic Computer Course</p>
-</div>
-
-<div class="box">
-<h3>CPCT Preparation</h3>
-<p>Typing + Computer + Reasoning</p>
-</div>
+<div class="box"><h3>PGDCA ₹10000</h3></div>
+<div class="box"><h3>DCA ₹8000</h3></div>
+<div class="box"><h3>CPCT ₹5000</h3></div>
 
 <button onclick="next('home')">⬅ Back</button>
 <button onclick="next('form')">Next → Form</button>
@@ -137,12 +238,15 @@ function openWhatsApp(){
 <h2>Admission Form</h2>
 
 <form onsubmit="submitForm(event)">
-<input type="text" id="name" placeholder="Your Name" required>
-<input type="number" id="mobile" placeholder="Mobile Number" required>
+<input id="name" placeholder="Name" required>
+<input id="mobile" placeholder="Mobile" required>
+<input id="address" placeholder="Address">
+<input id="education" placeholder="Education">
 
-<select id="course">
+<select id="course" onchange="showSyllabus()">
 <option>PGDCA</option>
 <option>DCA</option>
+<option>CPCT</option>
 </select>
 
 <button type="submit">Submit</button>
@@ -156,66 +260,61 @@ function openWhatsApp(){
 <h2>Syllabus</h2>
 
 <div class="box">
-<pre id="syllabusText" style="font-size: 20px;"></pre>
+<pre id="syllabusText"></pre>
 </div>
 
-<div class="box">
-<h3>CPCT Syllabus</h3>
-<p>- Computer Basics</p>
-<p>- Typing Hindi/English</p>
-<p>- MS Office</p>
-<p>- Internet</p>
+<div class="box" id="cpctBox" style="display:none;">
+<h3>CPCT Extra</h3>
+<p>- Typing Practice</p>
 <p>- Reasoning</p>
-</div>
-
-<button onclick="next('form')">⬅ Back</button>
-<button onclick="next('process')">Next → Process</button>
-</section>
-
-<!-- PROCESS -->
-<section id="process">
-<h2>Admission Process</h2>
-
-<div class="box">
-<h3>Eligibility <p>✔ CPCT: 12th Pass</p></h3>
-<p>✔ DCA: 12th Pass</p>
-<p>✔ PGDCA: Graduation</p>
-</div>
-
-<div class="box">
-<h3>Steps</h3>
-<p>1. Fill Form</p>
-<p>2. Select Course</p>
-<p>3. Contact on WhatsApp</p>
-<p>4. Pay Fees</p>
-<p>5. Start Classes</p>
-<button onclick="openWhatsApp()">📲 Open WhatsApp</button>
 </div>
 
 <div class="box">
 <h3>Fees</h3>
-<p>PGDCA: ₹10000</p>
-<p>DCA: ₹8000</p>
+<p id="feesText"></p>
+
+<button onclick="payOnline()">Pay UPI</button>
+<button onclick="feesPaid()">Fees Paid</button>
 </div>
 
-<button onclick="next('syllabus')">⬅ Back</button>
+<button onclick="next('form')">⬅ Back</button>
 <button onclick="next('contact')">Next → Contact</button>
 </section>
 
 <!-- CONTACT -->
 <section id="contact">
 <h2>Contact</h2>
-<p>Rishav Sharma</p>
+
 <p>📞 7440425359</p>
-<p>📍 Bhind, Madhya Pradesh</p>
+<p>📍 Bhind (M.P.)</p>
+<p>🏫 Paradise Public School, BTI Road, Bhind</p>
 
-<iframe src="https://maps.google.com/maps?q=bhind&t=&z=13&ie=UTF8&iwloc=&output=embed"
-width="100%" height="300"></iframe>
+<iframe 
+src="https://www.google.com/maps?q=Paradise+Public+School+BTI+Road+Bhind&output=embed"
+width="100%" height="300" style="border:0;border-radius:10px;">
+</iframe>
 
-<button onclick="next('process')">⬅ Back</button>
+<!-- ✔ ONLY ADD: BACK BUTTON -->
+<button onclick="next('syllabus')">⬅ Back</button>
 </section>
 
-<a class="whatsapp" href="https://wa.me/917440425359">💬</a>
+<!-- ADMIN -->
+<section id="admin">
+<h2>Admin Panel</h2>
+
+<button onclick="renderAdmin()">Refresh</button>
+<button onclick="downloadCSV()">Download CSV</button>
+<button onclick="clearData()" style="background:red;">Clear Data</button>
+
+<div id="studentList"></div>
+
+<button onclick="next('home')">⬅ Back to Home</button>
+</section>
+
+<!-- WHATSAPP FLOAT -->
+<div class="floating-enquiry" onclick="window.open('https://wa.me/917440425359')">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="35">
+</div>
 
 </body>
 </html>
